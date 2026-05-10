@@ -31,7 +31,7 @@ A professional, lightweight, and Dockerized health declaration system designed f
 ### Running the App
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/sadatia/TBM.git](https://github.com/sadatia/TBM.git)
+    git clone https://github.com/sadatia/TBM.git
     cd TBM
     ```
 

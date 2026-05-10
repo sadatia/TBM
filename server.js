@@ -7,19 +7,19 @@ import { JSONFile } from 'lowdb/node';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-// Database setup
-const adapter = new JSONFile(join(__dirname, 'db.json'));
+// --- DATABASE SETUP ---
+// Consolidated to use the 'db_folder' which helps prevent EBUSY errors in Docker
+const dbFolder = join(__dirname, 'db_folder');
+const file = join(dbFolder, 'db.json');
+const adapter = new JSONFile(file);
 const db = new Low(adapter, { users: [], records: [] });
 
-// Change this line in your server.js
-const file = join(__dirname, 'data', 'db.json'); 
-// Ensure the 'data' folder exists in your project or Dockerfile
-
 // Admin Security Key
-const ADMIN_KEY = "admin123"; 
+const ADMIN_KEY = "admin123";
 
 async function initDb() {
     await db.read();
+    // Initialize with default data if the file is empty or new
     db.data ||= { 
         users: [
             { id: 1, name: "K Takae", position: "PM", passcode: "1234" },
@@ -33,7 +33,7 @@ await initDb();
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public')); // Ensure your logo is in /public/logo/ptjvlogo.png
+app.use(express.static('public')); 
 
 // --- ROUTES ---
 
@@ -57,17 +57,23 @@ app.post('/declaration', async (req, res) => {
 
 // Submission
 app.post('/submit', async (req, res) => {
+    await db.read();
     const { userId, status, tbmConfirmed } = req.body;
     const user = db.data.users.find(u => u.id == userId);
-    db.data.records.push({
-        name: user.name,
-        status,
-        date: new Date().toLocaleDateString(),
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        tbm: tbmConfirmed === 'on'
-    });
-    await db.write();
-    res.render('success');
+    
+    if (user) {
+        db.data.records.push({
+            name: user.name,
+            status,
+            date: new Date().toLocaleDateString(),
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            tbm: tbmConfirmed === 'on'
+        });
+        await db.write();
+        res.render('success');
+    } else {
+        res.redirect('/');
+    }
 });
 
 // Admin Dashboard (Protected)
@@ -82,19 +88,34 @@ app.get('/admin', async (req, res) => {
     res.render('admin', { users: db.data.users, records: db.data.records, stats, adminKey: ADMIN_KEY });
 });
 
+// Admin - Add User (With 3-digit SN)
 app.post('/admin/add-user', async (req, res) => {
     if (req.query.key !== ADMIN_KEY) return res.status(403).send("Unauthorized");
+    await db.read();
+
+    // 1. Calculate the next numerical ID
+    const nextId = db.data.users.length > 0 
+        ? Math.max(...db.data.users.map(u => parseInt(u.id))) + 1 
+        : 1;
+
+    // 2. Format it as a 3-digit string (e.g., 001, 002)
+    const formattedId = String(nextId).padStart(3, '0');
+
+    // 3. Add to database
     db.data.users.push({
-        id: db.data.users.length + 1,
+        id: formattedId, 
         name: req.body.name,
         position: req.body.position,
         passcode: "1234"
     });
+
     await db.write();
     res.redirect(`/admin?key=${ADMIN_KEY}`);
 });
 
+// User - Self Update Passcode
 app.post('/update-passcode', async (req, res) => {
+    await db.read();
     const user = db.data.users.find(u => u.id == req.body.userId);
     if (user) {
         user.passcode = req.body.newPasscode;
@@ -102,11 +123,10 @@ app.post('/update-passcode', async (req, res) => {
         res.send("<script>alert('Passcode Updated'); window.location='/';</script>");
     }
 });
+
 // Admin - Edit User Name or Password
 app.post('/admin/edit-user', async (req, res) => {
-    // Security check
     if (req.query.key !== ADMIN_KEY) return res.status(403).send("Unauthorized");
-
     const { userId, newName, newPasscode } = req.body;
     await db.read();
     
@@ -114,27 +134,22 @@ app.post('/admin/edit-user', async (req, res) => {
     if (user) {
         if (newName) user.name = newName;
         if (newPasscode) user.passcode = newPasscode;
-        
         await db.write();
     }
-    
     res.redirect(`/admin?key=${ADMIN_KEY}`);
 });
 
 // Admin - Delete User
 app.post('/admin/delete-user', async (req, res) => {
     if (req.query.key !== ADMIN_KEY) return res.status(403).send("Unauthorized");
-
     const { userId } = req.body;
     await db.read();
-    
-    // Filter out the user with the matching ID
     db.data.users = db.data.users.filter(u => u.id != userId);
-    
     await db.write();
     res.redirect(`/admin?key=${ADMIN_KEY}`);
 });
 
+// Admin - Analysis Page
 app.get('/admin/analysis', async (req, res) => {
     if (req.query.key !== ADMIN_KEY) return res.status(403).send("Unauthorized");
     await db.read();
@@ -146,13 +161,10 @@ app.get('/admin/analysis', async (req, res) => {
     if (startDate && endDate) {
         const start = new Date(startDate);
         const end = new Date(endDate);
-        
-        // Calculate total days in range
         const diffTime = Math.abs(end - start);
         const totalDaysInRange = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
         reportData = db.data.users.map(user => {
-            // Find all logs for THIS user in THIS range
             const userLogs = db.data.records.filter(r => {
                 const rDate = new Date(r.date);
                 return r.name === user.name && rDate >= start && rDate <= end;
@@ -172,7 +184,7 @@ app.get('/admin/analysis', async (req, res) => {
                 wellCount: wellCount,
                 notWellCount: notWellCount,
                 complianceScore: Math.round((userLogs.length / totalDaysInRange) * 100),
-                logs: userLogs // Detail list if needed
+                logs: userLogs
             };
         });
     }
@@ -183,6 +195,8 @@ app.get('/admin/analysis', async (req, res) => {
     });
 });
 
-app.use(express.static('public'));
-
-app.listen(3000, () => console.log('🚀 Server: http://localhost:3000'));
+// --- SERVER START ---
+const PORT = 4460;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`PTJV System running at http://localhost:${PORT}`);
+});
