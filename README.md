@@ -44,7 +44,6 @@ A professional, lightweight, and Dockerized health declaration system designed f
 ## 📂 Data Persistence
 The system uses a Docker **Named Volume** called `ptjv_db_data`. This ensures that your personnel list and health records are preserved even if the container is stopped, updated, or removed.
 
----
 
 ## 📂 Project Structure
 
