@@ -57,12 +57,12 @@ The system uses a Docker **Named Volume** called `ptjv_db_data`. This ensures th
 ├── docker-compose.yml  # Docker Orchestration
 └── package.json        # Node.js Dependencies
 
----
+
 
 ## 🔒 Security
 The `ADMIN_KEY` is set to `admin123`. Access to the Admin and Analysis sections requires this key as a URL parameter to ensure data privacy.
 
----
+
 
 ## 📄 License
 Internal project for **Penta-Ocean / TOA (PTJV)** Site Office.
