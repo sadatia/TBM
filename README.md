@@ -1,66 +1,55 @@
 # PTJV Health Declaration & Attendance System
 
-A professional, lightweight, and Dockerized health declaration system designed for the **PTJV (Penta-Ocean / TOA)** project. This application allows personnel to submit daily health statuses and provides an administrative dashboard for real-time tracking and periodic compliance reporting.
+A professional, lightweight, and Dockerized health declaration system designed for the **PTJV (Penta-Ocean / TOA)** project. 
 
-## 🚀 Features
+## 🚀 Recent Updates
+* **Port Change:** Now running on port `4460` to avoid common local conflicts.
+* **Smart IDs:** Personnel are now assigned a clean 3-digit Serial Number (e.g., `001`, `002`) instead of long timestamps.
+* **Enhanced Stability:** Migrated to Named Volumes to prevent `EBUSY` file-locking errors on Windows/WSL environments.
 
-* **Daily Health Declaration:** Quick and easy form for personnel to report health status (Well/Not Well) and TBM attendance.
-* **Admin Dashboard:** Real-time monitoring of total submissions, health trends, and live status logs.
-* **Personnel Management:** Admin capability to Add, Edit (Name/Passcode), and Delete personnel.
-* **Advanced Analysis:** Dedicated reporting page with date-span filtering to track compliance scores and success rates over time.
-* **Print-Ready Reports:** Clean, professional layouts optimized for PDF export and site audits.
-* **Dockerized Environment:** One-command deployment ensures the app runs identically on any server.
-
----
-
-## 🛠️ Technology Stack
-
-* **Backend:** Node.js, Express.js
-* **Database:** LowDB (JSON-based, lightweight persistence)
-* **Frontend:** EJS (Embedded JavaScript templates), Tailwind CSS, FontAwesome
-* **Containerization:** Docker & Docker Compose
+## 🛠️ Features
+* **Daily Health Declaration:** Fast submission for personnel health status and TBM attendance.
+* **Admin Dashboard:** Monitor total submissions, health trends, and live logs.
+* **Personnel Management:** Add, Edit, and Delete personnel with automatic 3-digit SN assignment.
+* **Compliance Analysis:** Date-span filtering to track submission rates and health scores.
+* **Print-Ready Reports:** Professional layouts optimized for site audits and PDF exports.
 
 ---
 
 ## 📦 Installation & Setup
 
 ### Prerequisites
-* [Docker](https://docs.docker.com/get-docker/)
-* [Docker Compose](https://docs.docker.com/compose/install/)
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+* [Git](https://git-scm.com/)
 
 ### Running the App
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/sadatia/TBM.git
+    git clone [https://github.com/sadatia/TBM.git](https://github.com/sadatia/TBM.git)
     cd TBM
     ```
 
-2.  **Ensure your local database exists:**
-    ```bash
-    touch db.json
-    echo '{"users":[],"records":[]}' > db.json
-    ```
-
-3.  **Build and launch with Docker:**
+2.  **Launch with Docker:**
     ```bash
     docker compose up -d --build
     ```
 
-4.  **Access the application:**
-    * **User Interface:** `http://localhost:3000`
-    * **Admin Panel:** `http://localhost:3000/admin?key=admin123`
-    * **Analysis Page:** `http://localhost:3000/admin/analysis?key=admin123`
+3.  **Access the application:**
+    * **User Interface:** [http://localhost:4460](http://localhost:4460)
+    * **Admin Panel:** [http://localhost:4460/admin?key=admin123](http://localhost:4460/admin?key=admin123)
+    * **Analysis Page:** [http://localhost:4460/admin/analysis?key=admin123](http://localhost:4460/admin/analysis?key=admin123)
 
 ---
 
-## 📂 Project Structure
+## 📂 Data Persistence
+The system uses a Docker **Named Volume** called `ptjv_db_data`. This ensures that your personnel list and health records are preserved even if the container is stopped, updated, or removed.
 
-```text
-/TBM
-├── views/              # EJS Templates (UI)
-├── public/             # Static files (CSS, Logos)
-├── server.js           # Core Application Logic
-├── db.json             # Database (JSON)
-├── Dockerfile          # Docker Build Configuration
-├── docker-compose.yml  # Docker Orchestration
-└── package.json        # Node.js Dependencies
+---
+
+## 🔒 Security
+The `ADMIN_KEY` is set to `admin123`. Access to the Admin and Analysis sections requires this key as a URL parameter to ensure data privacy.
+
+---
+
+## 📄 License
+Internal project for **Penta-Ocean / TOA (PTJV)** Site Office.
