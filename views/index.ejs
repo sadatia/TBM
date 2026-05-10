@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTJV - TBM Attendance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#f3b948] min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8">
+        <div class="flex justify-center mb-6">
+            <img src="/logo/ptjvlogo.png" alt="PTJV Logo" class="h-16 object-contain">
+        </div>
+        <div class="text-center mb-6">
+            <h1 class="text-xl font-bold text-gray-700">Penta-Ocean/TOA JV</h1>
+            <p class="text-sm text-gray-400">TBM attendance & Health Declaration</p>
+        </div>
+        <div class="flex gap-2 mb-4">
+            <input type="text" id="search" placeholder="Search by name..." class="flex-1 border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold">Search</button>
+        </div>
+        <div class="border rounded-xl divide-y overflow-hidden max-h-80 overflow-y-auto" id="userList">
+            <% users.forEach(u => { %>
+                <div class="flex justify-between items-center p-4 hover:bg-gray-50 user-item">
+                    <div class="text-sm"><strong><%= u.id %></strong> - <%= u.name %> - <span class="text-gray-400 italic"><%= u.position %></span></div>
+                    <button onclick="loginModal('<%= u.id %>', '<%= u.name %>')" class="bg-cyan-400 text-white px-4 py-1 rounded-md font-bold text-xs uppercase">Login</button>
+                </div>
+            <% }) %>
+        </div>
+        <button onclick="adminLogin()" class="w-full mt-6 py-2 bg-gray-800 text-white rounded-lg font-bold text-xs">Admin Login</button>
+    </div>
+
+    <div id="modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4">
+        <form action="/declaration" method="POST" class="bg-white p-6 rounded-2xl w-full max-w-sm relative">
+            <button type="button" onclick="this.parentElement.parentElement.classList.add('hidden')" class="absolute right-4 top-4 text-gray-400">&times;</button>
+            <h2 class="text-xl font-bold mb-4">User Login</h2>
+            <p id="targetName" class="text-sm text-gray-500 mb-4 font-bold"></p>
+            <input type="hidden" name="userId" id="targetId">
+            <input type="password" name="passcode" placeholder="Passcode (4-8 chars)" required class="w-full border p-3 rounded-lg mb-4">
+            <button class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Login</button>
+        </form>
+    </div>
+
+    <script>
+        function loginModal(id, name) {
+            document.getElementById('targetId').value = id;
+            document.getElementById('targetName').innerText = "Logging in as: " + name;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+        function adminLogin() {
+            const k = prompt("Enter Admin Key:");
+            if(k) window.location.href = "/admin?key=" + k;
+        }
+        document.getElementById('search').addEventListener('input', function(e) {
+            const v = e.target.value.toLowerCase();
+            document.querySelectorAll('.user-item').forEach(i => {
+                i.style.display = i.innerText.toLowerCase().includes(v) ? 'flex' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

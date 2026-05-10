@@ -1,0 +1,10 @@
+# Ignore local dependencies
+node_modules/
+
+# Ignore your actual database (so you don't leak private user data)
+db.json
+*.tmp
+
+# Ignore environment/OS junk
+.DS_Store
+.env

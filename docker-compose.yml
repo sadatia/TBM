@@ -1,0 +1,16 @@
+services:
+  ptjv-app:
+    build: .
+    container_name: ptjv_health_system
+    ports:
+      - "3000:3000"
+    volumes:
+      # Instead of mapping the file directly, map a volume for data
+      - ptjv_data:/app/data
+      - ./public:/app/public
+    environment:
+      - NODE_ENV=production
+    restart: always
+
+volumes:
+  ptjv_data:
