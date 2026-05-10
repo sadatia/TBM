@@ -44,6 +44,17 @@ A professional, lightweight, and Dockerized health declaration system designed f
 ## 📂 Data Persistence
 The system uses a Docker **Named Volume** called `ptjv_db_data`. This ensures that your personnel list and health records are preserved even if the container is stopped, updated, or removed.
 
+---
+
+
+## 🔒 Security
+The `ADMIN_KEY` is set to `admin123`. Access to the Admin and Analysis sections requires this key as a URL parameter to ensure data privacy.
+
+---
+
+## 📄 License
+Internal project for **Penta-Ocean / TOA (PTJV)** Site Office.
+---
 
 ## 📂 Project Structure
 
@@ -56,14 +67,4 @@ The system uses a Docker **Named Volume** called `ptjv_db_data`. This ensures th
 ├── Dockerfile          # Docker Build Configuration
 ├── docker-compose.yml  # Docker Orchestration
 └── package.json        # Node.js Dependencies
-
-
-
-## 🔒 Security
-The `ADMIN_KEY` is set to `admin123`. Access to the Admin and Analysis sections requires this key as a URL parameter to ensure data privacy.
-
-
-
-## 📄 License
-Internal project for **Penta-Ocean / TOA (PTJV)** Site Office.
 
