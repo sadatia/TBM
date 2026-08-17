@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penta-Ocean/TOA JV | TBM Attendance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4 md:p-6 font-sans relative overflow-x-hidden antialiased text-slate-800">
+
+    <!-- MAIN HOME CARD -->
+    <div class="bg-white rounded-[2rem] shadow-xl border border-slate-200/80 w-full max-w-lg p-6 md:p-8 my-6 transition-all">
+        
+        <!-- LOGO HEADER -->
+        <div class="flex justify-center mb-3">
+            <img src="/logo/ptjvlogo.png" alt="Penta-Ocean / TOA JV Logo" class="h-10 w-auto max-w-[220px] object-contain">
+        </div>
+
+        <!-- TITLE HEADER -->
+        <div class="text-center mb-6">
+            <h1 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Penta-Ocean/TOA JV</h1>
+            <p class="text-[11px] md:text-xs text-slate-400 font-bold tracking-wider uppercase mt-0.5">TBM Attendance & Health Declaration</p>
+        </div>
+
+        <!-- REMEMBERED USER QUICK-LOGIN CARD -->
+        <div id="quickLoginCard" class="hidden bg-slate-50 border border-blue-200 rounded-3xl p-6 text-center mb-6 shadow-inner">
+            <span class="inline-block text-[10px] bg-blue-100 text-blue-700 uppercase font-black tracking-widest px-3 py-1 rounded-full mb-2">Saved Device Profile</span>
+            <h2 id="savedUserNameText" class="text-2xl font-black text-slate-800 mb-5 tracking-tight"></h2>
+            
+            <button onclick="loginSavedUser()" class="w-full bg-[#1d75f8] text-white py-4 rounded-2xl font-bold text-base shadow-lg shadow-blue-500/25 hover:bg-blue-600 hover:shadow-xl active:scale-[0.99] transition-all mb-3 flex items-center justify-center gap-2">
+                <i class="fas fa-key text-sm"></i> Enter Passcode
+            </button>
+            
+            <button onclick="clearSavedUser()" class="text-xs text-slate-400 hover:text-rose-500 font-bold tracking-wide transition-colors">
+                <i class="fas fa-user-friends mr-1"></i> Switch to Different User
+            </button>
+        </div>
+
+        <!-- FULL SEARCH AND USER LIST SECTION -->
+        <div id="fullUserListSection">
+            <!-- SEARCH BAR -->
+            <div class="flex gap-2 mb-5 border border-slate-200 rounded-2xl p-1 bg-slate-50 shadow-inner focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all">
+                <input type="text" id="searchInput" placeholder="Search by name or position..." 
+                       class="flex-1 px-3 py-2 bg-transparent outline-none text-slate-700 text-sm font-medium placeholder-slate-400">
+                <button id="searchBtn" type="button" class="bg-[#1d75f8] text-white px-5 py-2 rounded-xl font-bold text-sm shadow-md hover:bg-blue-600 active:scale-95 transition-all">
+                    Search
+                </button>
+            </div>
+
+            <!-- USER LIST CONTAINER -->
+            <div class="border border-slate-200/80 rounded-2xl divide-y divide-slate-100 max-h-[360px] overflow-y-auto mb-5 bg-white shadow-sm" id="userList">
+                <% users.forEach((user, index) => { %>
+                    <div class="flex justify-between items-center p-3.5 hover:bg-slate-50 transition-colors user-item">
+                        <div class="text-sm text-slate-700 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-800 font-black text-xs flex items-center justify-center shrink-0"><%= index + 1 %></span>
+                            <div class="flex flex-col md:flex-row md:items-center md:gap-1.5">
+                                <span class="font-bold text-slate-800"><%= user.username %></span>
+                                <span class="hidden md:inline text-slate-300">•</span>
+                                <span class="italic text-slate-400 font-medium text-xs md:text-sm"><%= user.position %></span>
+                            </div>
+                        </div>
+                        <!-- UPDATED TO SOFT ORANGE (AMBER) COLOR -->
+                        <button onclick="openCenterLoginModal('<%= user.id %>', '<%= user.username %>')" 
+                                class="bg-amber-500 text-white px-3.5 py-1.5 rounded-xl font-extrabold text-xs uppercase shadow-md shadow-amber-500/20 hover:bg-amber-600 hover:shadow-amber-500/40 active:scale-95 transition-all shrink-0">
+                            Login
+                        </button>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+
+        <!-- ADMIN LINK -->
+        <div class="text-center pt-1">
+            <a href="/admin/login" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-slate-700 font-bold tracking-wide transition-colors py-1 px-3 rounded-lg hover:bg-slate-100">
+                <i class="fas fa-lock text-[10px]"></i> Admin Management
+            </a>
+        </div>
+    </div>
+
+    <!-- CENTER LOGIN MODAL -->
+    <div id="centerLoginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-40 transition-opacity">
+        <div class="bg-white p-6 md:p-8 rounded-[2rem] w-full max-w-sm relative shadow-2xl border border-slate-100">
+            <button onclick="closeCenterLoginModal()" class="absolute right-5 top-5 w-8 h-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-lg font-bold hover:bg-rose-50 hover:text-rose-500 transition-colors">&times;</button>
+            
+            <h2 class="text-xl font-black text-slate-800 mb-1">Passcode Required</h2>
+            <p id="targetNameText" class="text-xs text-blue-600 font-bold mb-5"></p>
+            
+            <div class="mb-4">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">4-Digit Passcode</label>
+                <input type="password" id="modalPinInput" maxlength="4" placeholder="••••" autofocus
+                       class="w-full border-2 border-slate-200 focus:border-blue-500 p-3.5 rounded-2xl text-center font-mono text-2xl tracking-[0.5em] outline-none bg-slate-50 transition-all">
+            </div>
+
+            <!-- REMEMBER DEVICE CHECKBOX -->
+            <label class="flex items-center gap-2.5 mb-6 cursor-pointer group">
+                <input type="checkbox" id="rememberMeCheckbox" class="w-4 h-4 accent-blue-600 rounded-lg cursor-pointer">
+                <span class="text-xs text-slate-500 font-bold group-hover:text-slate-700 transition-colors">Remember me on this device</span>
+            </label>
+
+            <button onclick="verifyPinAndShowSidebar()" class="w-full bg-[#1d75f8] text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-600 active:scale-95 transition-all">
+                Verify & Continue
+            </button>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR MODAL OVERLAY -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-40" onclick="closeRightSidebar()"></div>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside id="rightSidebar" class="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-out p-6 md:p-8 flex flex-col justify-between overflow-y-auto border-l border-slate-100">
+        <div>
+            <!-- DRAWER HEADER -->
+            <div class="flex justify-between items-center mb-8 pb-4 border-b border-slate-100">
+                <div>
+                    <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Health Status</span>
+                    <h2 class="text-xl font-black text-slate-800 tracking-tight leading-snug">Welcome, <span id="activeUserHeader" class="text-emerald-600"></span></h2>
+                </div>
+                <button onclick="closeRightSidebar()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- ALREADY SUBMITTED TODAY CARD -->
+            <div id="alreadySubmittedAlert" class="hidden bg-cyan-50 border border-cyan-200 text-cyan-900 p-6 rounded-3xl text-center mb-8 shadow-sm">
+                <div class="w-12 h-12 bg-cyan-100 text-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl font-bold">✓</div>
+                <p class="font-bold text-sm">Status Submitted For Today</p>
+                <p class="text-xs text-cyan-700/80 mt-1 font-medium">You've already logged your wellness log today.<br>See you tomorrow! 😉</p>
+            </div>
+
+            <!-- DECLARATION FORM SECTION -->
+            <div id="declarationFormSection">
+                <p class="text-xs font-black uppercase tracking-wider text-slate-400 mb-3">How are you feeling today?</p>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <button type="button" onclick="selectStatus('Well')" id="wellBtn" 
+                            class="border-2 border-emerald-200 bg-emerald-50/50 text-emerald-700 py-5 rounded-2xl font-black text-lg flex flex-col items-center justify-center gap-1 hover:border-emerald-500 hover:bg-emerald-100/50 transition-all active:scale-95 shadow-sm">
+                        <span>Well</span>
+                        <span class="text-2xl">😊</span>
+                    </button>
+                    <button type="button" onclick="selectStatus('Not Well')" id="notWellBtn" 
+                            class="border-2 border-rose-200 bg-rose-50/50 text-rose-600 py-5 rounded-2xl font-black text-lg flex flex-col items-center justify-center gap-1 hover:border-rose-500 hover:bg-rose-100/50 transition-all active:scale-95 shadow-sm">
+                        <span>Not Well</span>
+                        <span class="text-2xl">🤒</span>
+                    </button>
+                </div>
+
+                <form id="statusForm" onsubmit="handleStatusSubmit(event)" class="mb-8 hidden">
+                    <input type="hidden" name="status" id="statusInput">
+                    
+                    <label class="flex items-start gap-3 bg-slate-50 border border-slate-200/80 p-4 rounded-2xl mb-6 cursor-pointer hover:bg-blue-50/30 transition-colors">
+                        <input type="checkbox" required class="mt-0.5 w-5 h-5 accent-blue-600 rounded cursor-pointer">
+                        <span class="text-xs text-slate-600 font-semibold leading-relaxed">I confirm I have received and understood today's Toolbox Meeting (TBM) topics.</span>
+                    </label>
+
+                    <button type="submit" class="w-full bg-[#1d75f8] text-white py-4 rounded-2xl font-extrabold text-base shadow-lg shadow-blue-500/25 hover:bg-blue-600 active:scale-95 transition-all">
+                        Save & Exit
+                    </button>
+                </form>
+            </div>
+
+            <!-- PIN MANAGEMENT -->
+            <div class="border-t border-slate-100 pt-6 mt-6">
+                <div class="flex gap-3 mb-4">
+                    <button onclick="toggleChangePin()" class="flex-1 bg-amber-500/10 text-amber-700 border border-amber-200 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-amber-500 hover:text-white transition-all shadow-sm">
+                        Change Passcode
+                    </button>
+                    <button onclick="closeRightSidebar()" class="flex-1 bg-slate-100 text-slate-600 border border-slate-200 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-slate-200 transition-all">
+                        Logout
+                    </button>
+                </div>
+
+                <form id="changePinForm" onsubmit="handleChangePin(event)" class="hidden space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                    <input type="password" id="oldPinInput" maxlength="4" placeholder="Current 4-Digit PIN" required class="w-full p-3.5 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono">
+                    <input type="password" id="newPinInput" maxlength="4" placeholder="New 4-Digit PIN" required class="w-full p-3.5 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono">
+                    <button type="submit" class="w-full bg-slate-800 text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-slate-900 transition-all shadow-md">
+                        Confirm Password Change
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- RESPONSE MODAL -->
+    <div id="responseModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl border border-slate-100">
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="font-bold text-slate-800 text-base">Status Submitted Successfully</h3>
+                <button onclick="closeResponseModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 transition-colors">&times;</button>
+            </div>
+            
+            <div class="p-8 text-center" id="responseModalBody">
+                <!-- Dynamic Response Injected Here -->
+            </div>
+
+            <div class="p-4 border-t border-slate-100 flex justify-end bg-slate-50/30">
+                <button onclick="closeResponseModal()" class="bg-[#1d75f8] text-white px-8 py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-blue-600 transition-all active:scale-95">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        let selectedUserId = null;
+        let selectedUserName = "";
+
+        // --- DEVICE LOCK / SAVED USER CHECK ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUserId = localStorage.getItem('ptjv_saved_user_id');
+            const savedUserName = localStorage.getItem('ptjv_saved_user_name');
+
+            if (savedUserId && savedUserName) {
+                selectedUserId = savedUserId;
+                selectedUserName = savedUserName;
+                
+                document.getElementById('savedUserNameText').innerText = savedUserName;
+                document.getElementById('quickLoginCard').classList.remove('hidden');
+                document.getElementById('fullUserListSection').classList.add('hidden');
+                
+                openCenterLoginModal(savedUserId, savedUserName);
+            }
+        });
+
+        function loginSavedUser() {
+            openCenterLoginModal(selectedUserId, selectedUserName);
+        }
+
+        function clearSavedUser() {
+            localStorage.removeItem('ptjv_saved_user_id');
+            localStorage.removeItem('ptjv_saved_user_name');
+            document.getElementById('quickLoginCard').classList.add('hidden');
+            document.getElementById('fullUserListSection').classList.remove('hidden');
+            closeCenterLoginModal();
+        }
+
+        // --- SEARCH FILTER ---
+        function filterUsers() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const rows = document.querySelectorAll('#userList > div');
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    row.style.setProperty('display', 'flex', 'important');
+                } else {
+                    row.style.setProperty('display', 'none', 'important');
+                }
+            });
+        }
+
+        document.getElementById('searchInput').addEventListener('input', filterUsers);
+        document.getElementById('searchBtn').addEventListener('click', filterUsers);
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                filterUsers();
+            }
+        });
+
+        // --- LOGIN MODAL LOGIC ---
+        function openCenterLoginModal(id, name) {
+            selectedUserId = id;
+            selectedUserName = name;
+            document.getElementById('targetNameText').innerText = "Logging in as: " + name;
+            document.getElementById('modalPinInput').value = '';
+            document.getElementById('rememberMeCheckbox').checked = (localStorage.getItem('ptjv_saved_user_id') === id);
+            document.getElementById('centerLoginModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('modalPinInput').focus(), 100);
+        }
+
+        function closeCenterLoginModal() {
+            document.getElementById('centerLoginModal').classList.add('hidden');
+        }
+
+        document.getElementById('modalPinInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                verifyPinAndShowSidebar();
+            }
+        });
+
+        async function verifyPinAndShowSidebar() {
+            const pin = document.getElementById('modalPinInput').value;
+            const rememberMe = document.getElementById('rememberMeCheckbox').checked;
+
+            if (!pin || pin.length !== 4) {
+                alert('Please enter a valid 4-digit PIN');
+                return;
+            }
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: selectedUserId, pin: pin })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    if (rememberMe) {
+                        localStorage.setItem('ptjv_saved_user_id', selectedUserId);
+                        localStorage.setItem('ptjv_saved_user_name', selectedUserName);
+                        document.getElementById('savedUserNameText').innerText = selectedUserName;
+                        document.getElementById('quickLoginCard').classList.remove('hidden');
+                        document.getElementById('fullUserListSection').classList.add('hidden');
+                    }
+
+                    closeCenterLoginModal();
+                    await openRightSidebar(selectedUserId, selectedUserName);
+                } else {
+                    alert(data.message || 'Invalid 4-digit PIN');
+                }
+            } catch (err) {
+                alert('Server connection error');
+            }
+        }
+
+        // --- RIGHT SIDEBAR LOGIC ---
+        async function openRightSidebar(userId, name) {
+            document.getElementById('activeUserHeader').innerText = "Mr. " + name;
+
+            document.getElementById('statusForm').classList.add('hidden');
+            document.getElementById('changePinForm').classList.add('hidden');
+            document.getElementById('wellBtn').className = "border-2 border-emerald-200 bg-emerald-50/50 text-emerald-700 py-5 rounded-2xl font-black text-lg flex flex-col items-center justify-center gap-1 hover:border-emerald-500 hover:bg-emerald-100/50 transition-all active:scale-95 shadow-sm";
+            document.getElementById('notWellBtn').className = "border-2 border-rose-200 bg-rose-50/50 text-rose-600 py-5 rounded-2xl font-black text-lg flex flex-col items-center justify-center gap-1 hover:border-rose-500 hover:bg-rose-100/50 transition-all active:scale-95 shadow-sm";
+
+            try {
+                const res = await fetch(`/api/user-status-today/${userId}`);
+                const statusData = await res.json();
+
+                if (statusData.alreadySubmitted) {
+                    document.getElementById('alreadySubmittedAlert').classList.remove('hidden');
+                    document.getElementById('declarationFormSection').classList.add('hidden');
+                } else {
+                    document.getElementById('alreadySubmittedAlert').classList.add('hidden');
+                    document.getElementById('declarationFormSection').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error('Failed to check today submission status');
+            }
+
+            document.getElementById('sidebarOverlay').classList.remove('pointer-events-none', 'opacity-0');
+            document.getElementById('rightSidebar').classList.remove('translate-x-full');
+        }
+
+        function closeRightSidebar() {
+            document.getElementById('sidebarOverlay').classList.add('pointer-events-none', 'opacity-0');
+            document.getElementById('rightSidebar').classList.add('translate-x-full');
+        }
+
+        function selectStatus(val) {
+            document.getElementById('statusInput').value = val;
+            const wellBtn = document.getElementById('wellBtn');
+            const notWellBtn = document.getElementById('notWellBtn');
+            
+            if (val === 'Well') {
+                wellBtn.className = "border-2 border-emerald-500 bg-emerald-500 text-white py-5 rounded-2xl font-black text-lg flex flex-col items-center justify-center gap-1 shadow-lg shadow-emerald-500/20 transition-all active:scale-95";
+                notWellBtn.className = "border-2 border-rose-200 bg-rose-50/50 text-rose-600 py-5 rounded-2xl font-black text-lg flex flex-col items-center justify-center gap-1 hover:border-rose-500 transition-all active:scale-95 opacity-60";
+            } else {
+                notWellBtn.className = "border-2 border-rose-500 bg-rose-500 text-white py-5 rounded-2xl font-black text-lg flex flex-col items-center justify-center gap-1 shadow-lg shadow-rose-500/20 transition-all active:scale-95";
+                wellBtn.className = "border-2 border-emerald-200 bg-emerald-50/50 text-emerald-700 py-5 rounded-2xl font-black text-lg flex flex-col items-center justify-center gap-1 hover:border-emerald-500 transition-all active:scale-95 opacity-60";
+            }
+            document.getElementById('statusForm').classList.remove('hidden');
+        }
+
+        async function handleStatusSubmit(e) {
+            e.preventDefault();
+            const status = document.getElementById('statusInput').value;
+
+            const response = await fetch('/submit-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                closeRightSidebar();
+                showResponseModal(status);
+            } else {
+                alert('Submission failed or already submitted today.');
+            }
+        }
+
+        function showResponseModal(status) {
+            const body = document.getElementById('responseModalBody');
+            
+            if (status === 'Well') {
+                body.innerHTML = `
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">😊</div>
+                    <p class="text-xl text-slate-800 font-bold">Thanks, Have a great day!</p>
+                `;
+            } else {
+                body.innerHTML = `
+                    <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">😷</div>
+                    <p class="text-base text-slate-700 font-semibold leading-relaxed">You are requested to communicate with the Clinic Team.</p>
+                    <a href="tel:+8801902506110" class="inline-block bg-blue-50 text-blue-600 border border-blue-200 px-6 py-3 rounded-2xl text-xl font-black mt-4 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                        +880 1902-506 110
+                    </a>
+                `;
+            }
+
+            document.getElementById('responseModal').classList.remove('hidden');
+        }
+
+        function closeResponseModal() {
+            document.getElementById('responseModal').classList.add('hidden');
+        }
+
+        function toggleChangePin() {
+            document.getElementById('changePinForm').classList.toggle('hidden');
+        }
+
+        async function handleChangePin(e) {
+            e.preventDefault();
+            const oldPin = document.getElementById('oldPinInput').value;
+            const newPin = document.getElementById('newPinInput').value;
+
+            const res = await fetch('/change-pin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPin, newPin })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                document.getElementById('changePinForm').classList.add('hidden');
+                document.getElementById('oldPinInput').value = '';
+                document.getElementById('newPinInput').value = '';
+            } else {
+                alert(data.message);
+            }
+        }
+    </script>
+</body>
+</html>

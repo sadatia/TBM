@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2>Hello, <%= user.username %>!</h2>
+        <a href="/logout" style="color: var(--not-well-color); font-weight: 700; text-decoration: none;">Logout</a>
+      </div>
+
+      <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+      <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+      <% if (alreadySubmitted) { %>
+        <div class="alert alert-success" style="text-align: center; padding: 24px;">
+          🎉 You have already submitted your status for today. See you tomorrow! 😉
+        </div>
+      <% } else { %>
+        <form action="/submit-status" method="POST">
+          <p class="subtitle">How are you feeling today?</p>
+          <input type="hidden" name="status" id="statusInput" required>
+          
+          <div class="status-grid">
+            <div class="status-btn well" onclick="selectStatus('Well', this)">Well 😊</div>
+            <div class="status-btn not-well" onclick="selectStatus('Not Well', this)">Not Well 🤒</div>
+          </div>
+
+          <button type="submit" id="submitBtn" class="btn" style="width: 100%; display: none;">Save & Exit</button>
+        </form>
+      <% } %>
+
+      <div style="margin-top: 32px; border-t: 1px solid #e2e8f0; padding-top: 16px;">
+        <h4 style="margin-bottom: 12px;">Change PIN</h4>
+        <form action="/change-pin" method="POST">
+          <input type="password" name="oldPin" placeholder="Old PIN" class="input-field" required>
+          <input type="password" name="newPin" placeholder="New PIN" maxlength="4" class="input-field" required>
+          <button type="submit" class="btn" style="width: 100%; background: #64748b;">Update PIN</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function selectStatus(status, element) {
+      document.getElementById('statusInput').value = status;
+      document.querySelectorAll('.status-btn').forEach(btn => btn.classList.remove('selected'));
+      element.classList.add('selected');
+      document.getElementById('submitBtn').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

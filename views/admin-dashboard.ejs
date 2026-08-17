@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTJV | Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-100 font-sans flex flex-col md:flex-row min-h-screen">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="bg-[#002b5c] w-full md:w-64 p-6 text-white flex flex-col justify-between shrink-0">
+        <div>
+            <div class="flex items-center gap-3 mb-8 bg-white/10 p-3 rounded-xl border border-white/20">
+                <img src="/logo/ptjvlogo.png" alt="PTJV Logo" class="h-8 bg-white p-1 rounded">
+                <div>
+                    <h2 class="font-bold text-xs tracking-wider uppercase">Penta-Ocean / TOA</h2>
+                    <p class="text-[10px] text-blue-200">Admin Management</p>
+                </div>
+            </div>
+
+            <nav class="space-y-2">
+                <a href="/admin/dashboard" class="flex items-center p-3 bg-white/10 rounded-xl font-bold border-l-4 border-yellow-500 text-white">
+                    <i class="fas fa-home w-6"></i> Dashboard
+                </a>
+                <a href="/admin/analytics" class="flex items-center p-3 text-slate-300 hover:bg-white/10 rounded-xl transition">
+                    <i class="fas fa-chart-pie w-6"></i> Analytics & Reports
+                </a>
+                <a href="/" class="flex items-center p-3 text-slate-300 hover:bg-white/10 rounded-xl transition">
+                    <i class="fas fa-external-link-alt w-6"></i> Public Kiosk
+                </a>
+                <a href="/admin/download-pdf" class="flex items-center p-3 text-slate-300 hover:bg-white/10 rounded-xl transition">
+    <i class="fas fa-file-pdf w-6"></i> Export PDF Report
+</a>
+            </nav>
+        </div>
+
+        <div class="pt-6 border-t border-white/10">
+            <a href="/admin/logout" class="flex items-center p-3 text-red-300 hover:bg-red-500/20 rounded-xl font-bold transition">
+                <i class="fas fa-sign-out-alt w-6"></i> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-6 md:p-10">
+        
+        <!-- Top Flash Alerts -->
+        <% if (typeof msg !== 'undefined' && msg) { %>
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-2xl mb-6 flex justify-between items-center">
+                <span><%= msg %></span>
+                <button onclick="this.parentElement.remove()" class="font-bold">&times;</button>
+            </div>
+        <% } %>
+
+        <!-- Statistics Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border-b-4 border-blue-500">
+                <p class="text-xs font-bold text-slate-400 uppercase">Total Logged Entries</p>
+                <h3 class="text-3xl font-black text-slate-800"><%= logs.length %></h3>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border-b-4 border-green-500">
+                <p class="text-xs font-bold text-slate-400 uppercase">Feeling Well Today</p>
+                <h3 class="text-3xl font-black text-green-600">
+                    <%= logs.filter(l => l.status === 'Well').length %>
+                </h3>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border-b-4 border-red-500">
+                <p class="text-xs font-bold text-slate-400 uppercase">Feeling Not Well</p>
+                <h3 class="text-3xl font-black text-red-600">
+                    <%= logs.filter(l => l.status !== 'Well').length %>
+                </h3>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Add Personnel Form -->
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                <h2 class="text-lg font-bold mb-6 italic border-b pb-2 text-slate-800">Register New Personnel</h2>
+                <form action="/admin/create-user" method="POST" class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Full Name</label>
+                        <input type="text" name="username" required placeholder="e.g. M Takano" class="w-full mt-1 bg-slate-50 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Job Position</label>
+                        <input type="text" name="position" required placeholder="e.g. DPM / Engineer" class="w-full mt-1 bg-slate-50 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Default 4-Digit PIN</label>
+                        <input type="password" name="pin" maxlength="4" placeholder="1234" class="w-full mt-1 bg-slate-50 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-mono transition">
+                    </div>
+                    <button class="w-full bg-[#002b5c] text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-900/10 hover:scale-[1.01] active:scale-95 transition">
+                        Register User
+                    </button>
+                </form>
+            </div>
+
+            <!-- Live Today's Status Log -->
+            <div class="bg-white rounded-3xl shadow-sm overflow-hidden border border-slate-100 flex flex-col">
+                <div class="p-4 bg-slate-50 font-bold border-b italic text-slate-700 flex justify-between items-center">
+    <span>Today's Live Logs (<%= logs.length %> Submissions)</span>
+    <a href="/admin/download-pdf" class="text-xs bg-blue-100 text-blue-600 px-3 py-1 rounded-lg font-bold hover:bg-blue-600 hover:text-white transition">PDF Report</a>
+</div>
+                <div class="max-h-[360px] overflow-y-auto flex-1">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-[10px] text-slate-400 uppercase sticky top-0">
+                            <tr>
+                                <th class="p-4">Name</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4">Date</th>
+                                <th class="p-4">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <% logs.forEach(r => { %>
+                                <tr class="text-sm hover:bg-slate-50">
+                                    <td class="p-4 font-bold text-slate-800"><%= r.username %></td>
+                                    <td class="p-4">
+                                        <span class="px-2 py-1 rounded font-black text-[10px] uppercase <%= r.status === 'Well' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
+                                            <%= r.status %>
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-xs text-slate-500"><%= r.submission_date %></td>
+                                    <td class="p-4 text-xs text-slate-400"><%= r.submission_time %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registered Personnel Table -->
+        <div class="bg-white rounded-3xl shadow-sm overflow-hidden border border-slate-100">
+            <div class="p-4 bg-slate-50 font-bold border-b italic flex justify-between items-center text-slate-700">
+                <span>Registered Personnel Management</span>
+                <span class="text-xs text-slate-400 font-normal">Total Users: <%= users.length %></span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 text-[10px] text-slate-400 uppercase">
+                        <tr>
+                            <th class="p-4">ID</th>
+                            <th class="p-4">Name</th>
+                            <th class="p-4">Position</th>
+                            <th class="p-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <% users.forEach(u => { %>
+                            <tr class="text-sm hover:bg-slate-50 transition">
+                                <td class="p-4 text-slate-400 font-mono">#<%= u.id %></td>
+                                <td class="p-4 font-bold text-slate-800"><%= u.username %></td>
+                                <td class="p-4 text-slate-500"><%= u.position %></td>
+                                <td class="p-4 text-right flex justify-end gap-2">
+                                    <button data-id="<%= u.id %>" data-name="<%= u.username %>" data-position="<%= u.position %>"
+                                            onclick="openEditModal(this)"
+                                            class="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-xl hover:bg-blue-600 hover:text-white transition text-xs font-bold">
+                                        <i class="fas fa-edit mr-1"></i> Edit
+                                    </button>
+
+                                    <form action="/admin/delete-user" method="POST" onsubmit="return confirm('Are you sure you want to delete <%= u.username %>?');">
+                                        <input type="hidden" name="userId" value="<%= u.id %>">
+                                        <button type="submit" class="bg-red-100 text-red-600 px-3 py-1.5 rounded-xl hover:bg-red-600 hover:text-white transition text-xs font-bold">
+                                            <i class="fas fa-trash-alt mr-1"></i> Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for User Editing -->
+    <div id="editModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-800 underline decoration-yellow-500 decoration-4 underline-offset-8">Edit Personnel</h2>
+                <button onclick="closeEditModal()" class="text-slate-400 text-2xl hover:text-red-500 transition">&times;</button>
+            </div>
+            
+            <form action="/admin/edit-user" method="POST" class="space-y-4">
+                <input type="hidden" name="userId" id="editUserId">
+                
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase">Full Name</label>
+                    <input type="text" name="username" id="editUserName" required 
+                           class="w-full mt-1 p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition">
+                </div>
+                
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase">Position</label>
+                    <input type="text" name="position" id="editUserPosition" required 
+                           class="w-full mt-1 p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition">
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase">Reset PIN (Optional)</label>
+                    <input type="password" name="newPin" maxlength="4" placeholder="Leave blank to keep current" 
+                           class="w-full mt-1 p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-mono transition">
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeEditModal()" class="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition">Cancel</button>
+                    <button type="submit" class="flex-1 py-3 bg-[#002b5c] text-white rounded-xl font-bold shadow-lg hover:bg-blue-900 transition">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal(btn) {
+            document.getElementById('editUserId').value = btn.getAttribute('data-id');
+            document.getElementById('editUserName').value = btn.getAttribute('data-name');
+            document.getElementById('editUserPosition').value = btn.getAttribute('data-position');
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        window.onclick = function(event) {
+            let modal = document.getElementById('editModal');
+            if (event.target === modal) {
+                closeEditModal();
+            }
+        }
+    </script>
+</body>
+</html>
