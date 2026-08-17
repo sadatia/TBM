@@ -15,14 +15,14 @@ async function resetAdmin() {
     driver: sqlite3.Database
   });
 
-  const newHashedPassword = await bcrypt.hash('445566778899', 10);
+  const newHashedPassword = await bcrypt.hash('admin1234', 10);
 
   await db.run('DELETE FROM admin WHERE username = "admin"');
   await db.run('INSERT INTO admin (username, password) VALUES (?, ?)', ['admin', newHashedPassword]);
 
   console.log('✅ Admin credentials successfully reset!');
   console.log('Username: admin');
-  console.log('Password: 445566778899');
+  console.log('Password: admin1234');
 
   await db.close();
 }
